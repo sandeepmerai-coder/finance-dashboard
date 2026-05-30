@@ -120,19 +120,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div> <div class="kpi-val">&#163;4.36M</div><div class="kpi-sub">Excl. all property</div></div>
   </div>
 
-  <div class="row2">
+  <div class="row2 mb">
     <div class="card">
-      <div class="card-title">Asset Allocation</div>
+      <div class="card-title">Asset Allocation — High Level</div>
+      <div class="lgnd" id="groupLegend"></div>
+      <div class="cw" style="height:270px"><canvas id="groupPieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Asset Allocation — Detailed</div>
       <div class="lgnd" id="pieLegend"></div>
       <div class="cw" style="height:270px"><canvas id="pieChart"></canvas></div>
     </div>
-    <div class="card">
-      <div class="card-title">Asset Breakdown</div>
-      <table class="asset-table">
-        <thead><tr><th>Asset class</th><th>Value</th><th style="text-align:right">% of gross</th></tr></thead>
-        <tbody id="assetTbody"></tbody>
-      </table>
-    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Asset Breakdown</div>
+    <table class="asset-table">
+      <thead><tr><th>Asset class</th><th>Value</th><th style="text-align:right">% of gross</th></tr></thead>
+      <tbody id="assetTbody"></tbody>
+    </table>
   </div>
 
   <div class="card mb" style="margin-top:18px">
@@ -371,6 +377,17 @@ var ASSETS=[
   {n:'Other Assets',v:19651,c:'#888780'}
 ];
 var GROSS=6809304;
+
+/* ─── HIGH-LEVEL ASSET GROUPS ─── */
+var GROUPS=[
+  {n:'Equity',            v:1671229+1543404+395742+119033, c:'#185FA5'},
+  {n:'Property',          v:2450460,                       c:'#3B6D11'},
+  {n:'Cash & Fixed Income',v:512271,                       c:'#378ADD'},
+  {n:'Alternatives',      v:75233+22282+19651,             c:'#EF9F27'}
+];
+var groupLeg=document.getElementById('groupLegend');
+GROUPS.forEach(function(g){var pct=(g.v/GROSS*100).toFixed(1);groupLeg.innerHTML+='<span class="li"><span class="ld" style="background:'+g.c+'"></span>'+g.n+' <strong style="color:#1A202C">'+pct+'%</strong></span>';});
+
 var pieLeg=document.getElementById('pieLegend');
 ASSETS.forEach(function(a){var pct=(a.v/GROSS*100).toFixed(1);pieLeg.innerHTML+='<span class="li"><span class="ld" style="background:'+a.c+'"></span>'+a.n+' <strong style="color:#1A202C">'+pct+'%</strong></span>';});
 var tbody=document.getElementById('assetTbody');
@@ -460,7 +477,15 @@ var PROP=[
 ══════════════════════════════════════════ */
 function initCharts(){
 
-  /* Asset donut */
+  /* High-level group donut */
+  new Chart(document.getElementById('groupPieChart'),{
+    type:'doughnut',
+    data:{labels:GROUPS.map(function(g){return g.n;}),datasets:[{data:GROUPS.map(function(g){return g.v;}),backgroundColor:GROUPS.map(function(g){return g.c;}),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  '+GBP+(c.parsed/1000).toFixed(0)+'k ('+(c.parsed/GROSS*100).toFixed(1)+'%)';}}}}
+    }
+  });
+
+  /* Detailed asset donut */
   new Chart(document.getElementById('pieChart'),{
     type:'doughnut',
     data:{labels:ASSETS.map(function(a){return a.n;}),datasets:[{data:ASSETS.map(function(a){return a.v;}),backgroundColor:ASSETS.map(function(a){return a.c;}),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
