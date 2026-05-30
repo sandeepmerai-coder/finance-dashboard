@@ -113,11 +113,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
      SUMMARY
 ══════════════════════════════════════════ -->
 <div id="summary" class="pane on">
-  <div class="kpis mb">
+  <div class="kpis mb" style="grid-template-columns:repeat(5,1fr)">
     <div class="kpi">   <div class="kpi-lbl">Net Worth</div>         <div class="kpi-val">&#163;6.06M</div><div class="kpi-sub">As of 27 May 2026</div></div>
     <div class="kpi g"> <div class="kpi-lbl">Gross Assets</div>      <div class="kpi-val">&#163;6.81M</div><div class="kpi-sub">Before debts</div></div>
     <div class="kpi r"> <div class="kpi-lbl">Total Debts</div>       <div class="kpi-val">&#163;753K</div> <div class="kpi-sub">Mortgage &amp; loans</div></div>
     <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div> <div class="kpi-val">&#163;4.36M</div><div class="kpi-sub">Excl. all property</div></div>
+    <div class="kpi t"> <div class="kpi-lbl">Debt Ratio</div>        <div class="kpi-val">11.1%</div>     <div class="kpi-sub">Debt as % of gross assets</div></div>
   </div>
 
   <div class="row2 mb">
@@ -141,7 +142,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </table>
   </div>
 
-  <div class="card mb" style="margin-top:18px">
+  <div class="card mb">
+    <div class="card-title">Assets vs Debts Bridge</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#1D9E75"></span>Net Worth</span>
+      <span class="li"><span class="ld" style="background:#E24B4A"></span>Total Debts</span>
+    </div>
+    <div class="cw" style="height:110px"><canvas id="debtBridge"></canvas></div>
+    <div class="chart-note">Gross Assets = Net Worth + Total Debts. Debt ratio: 11.1% — low leverage.</div>
+  </div>
+
+  <div class="card mb">
     <div class="card-title">Investable Portfolio Growth — ISA, Pensions &amp; Taxable (Excl. Property &amp; Cash)</div>
     <div class="lgnd">
       <span class="li"><span class="ld" style="background:#185FA5"></span>ISA / LISA Equity</span>
@@ -476,6 +487,27 @@ var PROP=[
    CHART INIT
 ══════════════════════════════════════════ */
 function initCharts(){
+
+  /* Assets vs Debts bridge */
+  var DEBT=753140, NW_VAL=6056164;
+  new Chart(document.getElementById('debtBridge'),{
+    type:'bar',
+    data:{
+      labels:['Gross Assets'],
+      datasets:[
+        {label:'Net Worth', data:[NW_VAL], backgroundColor:'#1D9E75', borderRadius:4, stack:'s'},
+        {label:'Total Debts',data:[DEBT],  backgroundColor:'#E24B4A', borderRadius:4, stack:'s'}
+      ]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+(c.parsed.x/1000).toFixed(0)+'k ('+(c.parsed.x/GROSS*100).toFixed(1)+'%)';}}}},
+      scales:{
+        x:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000000).toFixed(1)+'M';},font:{size:11}}},
+        y:{stacked:true,grid:{display:false},ticks:{font:{size:12}}}
+      }
+    }
+  });
 
   /* High-level group donut */
   new Chart(document.getElementById('groupPieChart'),{
