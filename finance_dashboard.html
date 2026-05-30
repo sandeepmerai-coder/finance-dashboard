@@ -113,12 +113,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
      SUMMARY
 ══════════════════════════════════════════ -->
 <div id="summary" class="pane on">
-  <div class="kpis mb" style="grid-template-columns:repeat(5,1fr)">
+  <div class="kpis3 mb" style="margin-bottom:13px">
     <div class="kpi">   <div class="kpi-lbl">Net Worth</div>         <div class="kpi-val">&#163;6.06M</div><div class="kpi-sub">As of 27 May 2026</div></div>
     <div class="kpi g"> <div class="kpi-lbl">Gross Assets</div>      <div class="kpi-val">&#163;6.81M</div><div class="kpi-sub">Before debts</div></div>
     <div class="kpi r"> <div class="kpi-lbl">Total Debts</div>       <div class="kpi-val">&#163;753K</div> <div class="kpi-sub">Mortgage &amp; loans</div></div>
-    <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div> <div class="kpi-val">&#163;4.36M</div><div class="kpi-sub">Excl. all property</div></div>
-    <div class="kpi t"> <div class="kpi-lbl">Debt Ratio</div>        <div class="kpi-val">11.1%</div>     <div class="kpi-sub">Debt as % of gross assets</div></div>
+  </div>
+  <div class="kpis3 mb">
+    <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div>        <div class="kpi-val">&#163;5.48M</div><div class="kpi-sub">Excl. residential home only</div></div>
+    <div class="kpi t"> <div class="kpi-lbl">Investable Liquid Assets</div> <div class="kpi-val">&#163;4.36M</div><div class="kpi-sub">Excl. all property</div></div>
+    <div class="kpi a"> <div class="kpi-lbl">Debt Ratio</div>               <div class="kpi-val">11.1%</div>     <div class="kpi-sub">Debt as % of gross assets</div></div>
   </div>
 
   <div class="row2 mb">
@@ -300,17 +303,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div class="card mb">
-    <div class="card-title">Key Category Trends (2012–2025)</div>
-    <div class="lgnd">
-      <span class="li"><span class="ld" style="background:#185FA5"></span>Children Education</span>
-      <span class="li"><span class="ld" style="background:#5DCAA5"></span>Travel / Vacation</span>
-      <span class="li"><span class="ld" style="background:#639922"></span>Groceries</span>
-      <span class="li"><span class="ld" style="background:#EF9F27"></span>Dining Out</span>
-      <span class="li"><span class="ld" style="background:#D85A30"></span>Council Tax</span>
-      <span class="li"><span class="ld" style="background:#7030A0"></span>Utilities</span>
-    </div>
-    <div class="cw" style="height:320px"><canvas id="expHistLines"></canvas></div>
-    <div class="chart-note">Children Education 2024 normalised to £38,500 (original £128k included ~£90k one-off upfront tuition). 2020 Travel near-zero = COVID lockdowns.</div>
+    <div class="card-title">Core Essentials — Category Trends (2012–2026 YTD)</div>
+    <div class="lgnd" id="lgnd-core"></div>
+    <div class="cw" style="height:300px"><canvas id="lineCore"></canvas></div>
+    <div class="chart-note">Automobile 2016 spike = car purchase. Healthcare 2013/2015 = one-off medical costs.</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Children — Category Trends (2012–2026 YTD)</div>
+    <div class="lgnd" id="lgnd-children"></div>
+    <div class="cw" style="height:280px"><canvas id="lineChildren"></canvas></div>
+    <div class="chart-note">Children Education 2024 normalised to £38,500 (original £128k included ~£90k one-off upfront tuition for Eesha).</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Lifestyle — Category Trends (2012–2026 YTD)</div>
+    <div class="lgnd" id="lgnd-lifestyle"></div>
+    <div class="cw" style="height:280px"><canvas id="lineLifestyle"></canvas></div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Housing — Category Trends (2012–2026 YTD)</div>
+    <div class="lgnd" id="lgnd-housing"></div>
+    <div class="cw" style="height:240px"><canvas id="lineHousing"></canvas></div>
+    <div class="chart-note">Home Improvement 2016 & 2018 = major renovation projects.</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Travel / Vacation — Annual Spend (2012–2026 YTD)</div>
+    <div class="lgnd" id="lgnd-travel"></div>
+    <div class="cw" style="height:220px"><canvas id="lineTravel"></canvas></div>
+    <div class="chart-note">2020 near-zero = COVID lockdowns. 2026 YTD already at £15,170 — 76% of annual budget by May.</div>
   </div>
 </div><!-- /exphistory -->
 
@@ -469,6 +492,50 @@ var EH_CATS=[
   {n:'Utilities',         c:'#7030A0',d:[2277,1926,1951,1547,2189,1907,2220,2279,1725,2249,2943,3444,2317,2933]}
 ];
 
+/* ─── Per-category Expense History ─── */
+var EH_YRS_FULL=['2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026 YTD'];
+var EH_CORE=[
+  {n:'Groceries',     c:'#185FA5', d:[2042.80,2679.08,2393.28,2566.71,2938.63,2873.79,3201.49,2794.57,4310.63,3991.15,3926.67,4746.80,4788.44,5476.28,2430.49]},
+  {n:'Council Tax',   c:'#1D9E75', d:[2156.95,2182.85,2181.07,1808.02,2099.06,2310.55,2020.26,2409.58,2504.01,2633.29,2743.77,2889.08,2977.48,3304.97,1153.10]},
+  {n:'Utilities',     c:'#378ADD', d:[2277.07,1926.40,1951.08,1547.16,2188.52,1907.12,2220.21,2278.89,1725.15,2248.89,2942.85,3444.10,2316.53,2933.38,1440]},
+  {n:'Transport',     c:'#EF9F27', d:[310,1180,1170,1414.80,3199.60,2964.83,2947.39,2421.87,581.80,482.36,840,1017.59,1332.35,1489.18,854.79]},
+  {n:'Automobile',    c:'#D85A30', d:[1218.55,1502.76,1157.08,874.56,13254.14,813.35,1497.09,1429.13,1299.12,1680.81,2198.72,3367.92,2089.83,3922.92,1568.22]},
+  {n:'Insurance',     c:'#7030A0', d:[798.27,632.23,559.13,480.51,975.13,1102.64,1182.30,741.10,900,725.97,627.37,681.26,932.08,1018.50,236.20]},
+  {n:'Personal Care', c:'#97C459', d:[523.99,448.40,328.63,401.24,438.09,606.92,474.02,410.54,436.12,466.85,879.87,1079.49,3967.61,1708.45,367.46]},
+  {n:'Healthcare',    c:'#888780', d:[243.72,5319.35,2634.80,6619.67,201.72,590.66,418.89,368.98,273.41,376.41,158.63,85.19,483.90,1751.98,755.34]}
+];
+var EH_CHILDREN=[
+  {n:'Children Education',         c:'#185FA5', d:[8890.57,8890.57,9384.25,7538.94,14714.03,18530.98,14202.58,18950.85,22632.25,27201.93,34290.85,35960.84,38500,22263.57,13357.37]},
+  {n:'Children Activities/Sports', c:'#1D9E75', d:[0,0,0,0,0,1007.09,1593.49,2239.33,3670.49,2505.95,3108.80,5825.07,4172.88,2263.88,1005.26]},
+  {n:'Children Music',             c:'#EF9F27', d:[0,0,0,0,0,0,0,0,0,2780.44,2437.50,1915,2229.95,1644.02,502.45]},
+  {n:'Children Clothing',          c:'#D85A30', d:[0,0,0,0,0,0,0,0,376.92,454.55,507.23,689.60,882.79,1003.56,115.24]},
+  {n:'Children Toys/Ent',          c:'#97C459', d:[0,0,0,0,0,716.48,730.76,1052.90,791.58,456.60,310.05,182.22,165.05,0,5.68]}
+];
+var EH_LIFESTYLE=[
+  {n:'Dining Out',      c:'#185FA5', d:[1384.15,1877.36,1931.35,1308.32,2612.79,2251.77,2523.13,1915.13,777.99,1285.59,2339.02,2571.30,2791.71,3468.12,1069.88]},
+  {n:'Clothing',        c:'#1D9E75', d:[762.98,759.85,1070.67,921.86,1018.56,962.91,1305.48,959.02,233.01,307.02,585.02,816,676.74,1453.35,162.91]},
+  {n:'Gifts',           c:'#EF9F27', d:[820.04,687.54,359.72,646.52,1114.02,948.63,782.84,916.51,758.97,1127.15,1144.67,538.43,818.18,914.24,481.86]},
+  {n:'Sports/Gym',      c:'#D85A30', d:[318.76,327.90,875.38,819.07,681.79,650.97,678.09,839.21,534,195.60,97.20,577.26,269.23,1281.54,467.70]},
+  {n:'Entertainment',   c:'#7030A0', d:[636.94,580.07,577.39,392.21,832.48,543.28,957.01,746.78,111.13,565.89,615.16,956.63,764.51,818.67,183.65]},
+  {n:'Hobbies/Leisure', c:'#97C459', d:[171.61,95.06,130.45,0,165.19,804.12,901.44,837.13,427.63,406.28,283.22,429.91,227.57,418.86,7.53]}
+];
+var EH_HOUSING=[
+  {n:'Home Improvement', c:'#185FA5', d:[280.77,4128.87,2639.25,33.13,18762.42,7836.35,34627.87,1345.66,1014.51,1004.04,1931.49,3493.88,676.58,1474.85,4467.36]},
+  {n:'Gardening',        c:'#1D9E75', d:[0,0,0,0,0,193.57,655.49,825,736.34,1072.50,1387.30,1200,1378,1680,554.50]},
+  {n:'Household',        c:'#EF9F27', d:[592.40,1447.99,411.12,273.06,683.70,1634.28,904.42,874.08,723.76,605.69,707.82,923.84,612.74,1676.82,452.98]}
+];
+var EH_TRAVEL=[
+  {n:'Travel/Vacation', c:'#5DCAA5', d:[6230.86,3329.76,3548.39,8883.35,3617.88,6057.94,6082.80,4534.86,235.97,6175.76,3946.03,8059.91,6099.73,11839.53,15170.25]}
+];
+function makeLgnd(id, cats){var el=document.getElementById(id);cats.forEach(function(c){el.innerHTML+='<span class="li"><span class="ld" style="background:'+c.c+'"></span>'+c.n+'</span>';});}
+function makeLineChart(id, cats){
+  return new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels:EH_YRS_FULL,datasets:cats.map(function(c){return{label:c.n,data:c.d,borderColor:c.c,backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:0.3};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(ctx){return '  '+ctx.dataset.label+': '+GBP+Math.round(ctx.parsed.y).toLocaleString();}}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}}}
+  });
+}
+
 /* ─── Property ─── */
 var PROP=[
   {y:'2016-17',inc:18000,exp:10313,net:7687},
@@ -599,12 +666,12 @@ function initCharts(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+Math.round(c.parsed.y).toLocaleString();},footer:function(items){var t=items.reduce(function(s,i){return s+(i.raw||0);},0);return 'Total: '+GBP+Math.round(t).toLocaleString();}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}}}
   });
 
-  /* Expense History category lines */
-  new Chart(document.getElementById('expHistLines'),{
-    type:'line',
-    data:{labels:EH_YRS,datasets:EH_CATS.map(function(cat){return{label:cat.n,data:cat.d,borderColor:cat.c,backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:0.3};})},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+Math.round(c.parsed.y).toLocaleString();}}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}}}
-  });
+  /* Per-category expense history line charts */
+  makeLgnd('lgnd-core', EH_CORE);         makeLineChart('lineCore', EH_CORE);
+  makeLgnd('lgnd-children', EH_CHILDREN); makeLineChart('lineChildren', EH_CHILDREN);
+  makeLgnd('lgnd-lifestyle', EH_LIFESTYLE);makeLineChart('lineLifestyle', EH_LIFESTYLE);
+  makeLgnd('lgnd-housing', EH_HOUSING);   makeLineChart('lineHousing', EH_HOUSING);
+  makeLgnd('lgnd-travel', EH_TRAVEL);     makeLineChart('lineTravel', EH_TRAVEL);
 
   /* Property income vs expenses combo */
   new Chart(document.getElementById('propCombo'),{
