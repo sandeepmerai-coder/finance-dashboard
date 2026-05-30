@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Finance Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1F3864;--blue:#185FA5;--green-lt:#639922;--teal-lt:#5DCAA5;
+  --amber-lt:#EF9F27;--coral-lt:#D85A30;--gray-lt:#D3D1C7;
+  --bg:#F2F4F8;--card:#FFFFFF;
+  --text:#1A202C;--text2:#4A5568;--text3:#718096;
+  --bdr:rgba(0,0,0,0.08);--r:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.hdr{background:var(--navy);padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+.hdr-title{color:#fff;font-size:19px;font-weight:600}
+.hdr-sub{color:#9DC3E6;font-size:12px;margin-top:2px}
+.hdr-date{color:#9DC3E6;font-size:12px;text-align:right;line-height:1.7}
+
+/* ── Top tab bar ── */
+.tab-bar{background:#fff;border-bottom:1.5px solid var(--bdr);padding:0 32px;display:flex;gap:4px}
+.tab{padding:13px 22px;font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-1.5px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--text2)}
+.tab.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:600}
+
+/* ── Sub tab bar (Expenses) ── */
+.sub-tab-bar{background:#F7F9FC;border-bottom:1px solid var(--bdr);padding:0 32px;display:none;gap:4px}
+.sub-tab{padding:9px 20px;font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .15s}
+.sub-tab:hover{color:var(--text2)}
+.sub-tab.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+.main{max-width:1380px;margin:0 auto;padding:24px 32px}
+.pane{display:none}.pane.on{display:block}
+.sub-pane{display:none}.sub-pane.on{display:block}
+
+.kpis{display:grid;gap:13px;margin-bottom:18px;grid-template-columns:repeat(4,1fr)}
+.kpis3{display:grid;gap:13px;margin-bottom:18px;grid-template-columns:repeat(3,1fr)}
+.kpi{background:var(--card);border-radius:var(--r);padding:18px 20px;border:0.5px solid var(--bdr);border-top:3px solid var(--blue)}
+.kpi.g{border-top-color:var(--green-lt)}.kpi.a{border-top-color:var(--amber-lt)}.kpi.t{border-top-color:var(--teal-lt)}.kpi.r{border-top-color:var(--coral-lt)}.kpi.pu{border-top-color:#7030A0}
+.kpi-lbl{font-size:10.5px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.kpi-val{font-size:27px;font-weight:600;color:var(--navy);line-height:1;margin-bottom:5px}
+.kpi-sub{font-size:11.5px;color:var(--text3);line-height:1.4}
+
+.card{background:var(--card);border-radius:var(--r);padding:20px 22px;border:0.5px solid var(--bdr)}
+.card-title{font-size:11.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:18px}
+.mb{margin-bottom:18px}
+.lgnd{display:flex;flex-wrap:wrap;gap:7px 16px;margin-bottom:13px;font-size:11.5px;color:var(--text2)}
+.li{display:flex;align-items:center;gap:5px}
+.ld{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+.ll{width:22px;height:2.5px;border-radius:2px;flex-shrink:0}
+.cw{position:relative}
+
+.asset-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.asset-table th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:0 0 10px;text-align:left;border-bottom:1px solid var(--bdr)}
+.asset-table th:last-child,.asset-table td:last-child{text-align:right}
+.asset-table td{padding:8px 0;border-bottom:.5px solid rgba(0,0,0,0.05)}
+.asset-table td:last-child{font-weight:600;color:var(--navy)}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:7px}
+.bar-bg{background:#EDF2F7;border-radius:4px;height:5px;margin-top:3px;overflow:hidden}
+.bar-fill{height:5px;border-radius:4px}
+
+.alert{background:#FFF8E7;border:1px solid #F9C74F;border-radius:8px;padding:11px 16px;margin-bottom:18px;font-size:12px;color:#5C3D00;display:flex;align-items:flex-start;gap:9px}
+.contract-list{display:flex;flex-direction:column;gap:8px}
+.contract-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:7px;font-size:12px}
+.contract-item.expired{background:#FEF2F2;border:1px solid #FECACA}
+.contract-item.soon{background:#FFFBEB;border:1px solid #FDE68A}
+.contract-item.ok{background:#F0FDF4;border:1px solid #BBF7D0}
+.contract-label{font-weight:500;color:var(--text)}.contract-sub{color:var(--text3);font-size:11px}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.badge.expired{background:#FEE2E2;color:#991B1B}
+.badge.soon{background:#FEF3C7;color:#92400E}
+.badge.ok{background:#D1FAE5;color:#065F46}
+
+.income-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid rgba(0,0,0,0.05);font-size:12.5px}
+.income-row:last-child{border-bottom:none;font-weight:600;color:var(--navy);padding-top:12px}
+.income-label{color:var(--text2)}
+.income-val{font-weight:500;color:var(--navy)}
+.chart-note{font-size:11px;color:var(--text3);margin-top:8px;font-style:italic}
+.footer{background:var(--navy);color:#9DC3E6;text-align:center;padding:12px;font-size:11.5px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Personal Finance Dashboard</div>
+    <div class="hdr-sub">Sandeep &amp; Seema &nbsp;&middot;&nbsp; All figures GBP</div>
+  </div>
+  <div class="hdr-date">29 May 2026<br>Master Summary</div>
+</div>
+
+<!-- Top tabs -->
+<div class="tab-bar">
+  <button class="tab on"  data-tab="summary"    onclick="go('summary')">Summary</button>
+  <button class="tab"     data-tab="expenses"   onclick="go('expenses')">Expenses</button>
+  <button class="tab"     data-tab="exphistory" onclick="go('exphistory')">Expense History</button>
+  <button class="tab"     data-tab="property"   onclick="go('property')">Property</button>
+</div>
+
+<!-- Expenses sub-tabs (hidden until Expenses tab active) -->
+<div id="sub-bar-expenses" class="sub-tab-bar">
+  <button class="sub-tab on" data-sub="exp-ytd" onclick="subgo('expenses','exp-ytd')">2026 YTD</button>
+  <button class="sub-tab"    data-sub="exp-mtd" onclick="subgo('expenses','exp-mtd')">May 2026 Monthly</button>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════
+     SUMMARY
+══════════════════════════════════════════ -->
+<div id="summary" class="pane on">
+  <div class="kpis mb">
+    <div class="kpi">   <div class="kpi-lbl">Net Worth</div>         <div class="kpi-val">&#163;6.06M</div><div class="kpi-sub">As of 27 May 2026</div></div>
+    <div class="kpi g"> <div class="kpi-lbl">Gross Assets</div>      <div class="kpi-val">&#163;6.81M</div><div class="kpi-sub">Before debts</div></div>
+    <div class="kpi r"> <div class="kpi-lbl">Total Debts</div>       <div class="kpi-val">&#163;753K</div> <div class="kpi-sub">Mortgage &amp; loans</div></div>
+    <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div> <div class="kpi-val">&#163;4.36M</div><div class="kpi-sub">Excl. all property</div></div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Asset Allocation</div>
+      <div class="lgnd" id="pieLegend"></div>
+      <div class="cw" style="height:270px"><canvas id="pieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Asset Breakdown</div>
+      <table class="asset-table">
+        <thead><tr><th>Asset class</th><th>Value</th><th style="text-align:right">% of gross</th></tr></thead>
+        <tbody id="assetTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mb" style="margin-top:18px">
+    <div class="card-title">Investable Portfolio Growth — ISA, Pensions &amp; Taxable (Excl. Property &amp; Cash)</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#185FA5"></span>ISA / LISA Equity</span>
+      <span class="li"><span class="ld" style="background:#1D9E75"></span>Pensions</span>
+      <span class="li"><span class="ld" style="background:#EF9F27"></span>Non-ISA / Taxable &amp; Alts</span>
+    </div>
+    <div class="cw" style="height:260px"><canvas id="nwTrend"></canvas></div>
+    <div class="chart-note">Source: Securities Snapshot. Includes ISAs, LISAs, pensions, taxable equity, alternatives and crypto. Excludes property, cash savings and residential home.</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Service Contract Alerts</div>
+    <div class="contract-list">
+      <div class="contract-item ok"><div><div class="contract-label">Car Insurance (Aviva)</div><div class="contract-sub">Policy AZC463407199</div></div><span class="badge ok">Expires Apr 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Road Tax (DVLA)</div><div class="contract-sub">FY13 PYH</div></div><span class="badge ok">Expires Apr 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">TV Licence</div><div class="contract-sub">Licence 4151886543</div></div><span class="badge ok">Expires May 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Spotify</div><div class="contract-sub">Family subscription</div></div><span class="badge ok">Expires Apr 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Garden Waste (Hillingdon)</div><div class="contract-sub">Ref 38156380</div></div><span class="badge ok">Expires Mar 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Home Insurance (Frontier)</div><div class="contract-sub">Buildings + Contents</div></div><span class="badge ok">Expires Nov 2026</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">NY Times Subscription</div><div class="contract-sub">Membership 121777479</div></div><span class="badge ok">Expires Oct 2026</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Mortgage (Coventry BS)</div><div class="contract-sub">1.79% fixed repayment</div></div><span class="badge ok">Expires Jun 2027</span></div>
+      <div class="contract-item ok"><div><div class="contract-label">Internet (Virgin Media)</div><div class="contract-sub">Account 211418802</div></div><span class="badge ok">Expires Mar 2028</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     EXPENSES  (container for sub-panes)
+══════════════════════════════════════════ -->
+<div id="expenses" class="pane">
+
+  <!-- ── YTD sub-pane ── -->
+  <div id="exp-ytd" class="sub-pane on">
+    <div class="kpis mb">
+      <div class="kpi g"> <div class="kpi-lbl">YTD Net Income</div>  <div class="kpi-val">&#163;95,027</div><div class="kpi-sub">Jan–May 2026 (after tax)</div></div>
+      <div class="kpi a"> <div class="kpi-lbl">YTD Spend</div>       <div class="kpi-val">&#163;50,741</div><div class="kpi-sub">Excl. mortgage &middot; 53% of annual budget</div></div>
+      <div class="kpi">   <div class="kpi-lbl">YTD Net Savings</div> <div class="kpi-val">&#163;29,182</div><div class="kpi-sub">After all costs incl. mortgage</div></div>
+      <div class="kpi t"> <div class="kpi-lbl">Savings Rate</div>    <div class="kpi-val">30.7%</div>     <div class="kpi-sub">% of net income YTD</div></div>
+    </div>
+    <div class="row2 mb">
+      <div class="card">
+        <div class="card-title">YTD Income Sources</div>
+        <div class="income-row"><span class="income-label">Sandeep salary (net)</span><span class="income-val">&#163;39,779</span></div>
+        <div class="income-row"><span class="income-label">Seema salary (net)</span><span class="income-val">&#163;30,790</span></div>
+        <div class="income-row"><span class="income-label">Property income</span><span class="income-val">&#163;19,027</span></div>
+        <div class="income-row"><span class="income-label">Alternative income</span><span class="income-val">&#163;11,872</span></div>
+        <div class="income-row"><span class="income-label">Passive income</span><span class="income-val">&#163;3,858</span></div>
+        <div class="income-row"><span class="income-label">Est. additional taxes</span><span class="income-val">-&#163;10,298</span></div>
+        <div class="income-row"><span class="income-label">Total net income</span><span class="income-val">&#163;95,027</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monthly Cashflow — Jan to May 2026</div>
+        <div class="lgnd">
+          <span class="li"><span class="ld" style="background:rgba(99,153,34,0.8)"></span>Net income</span>
+          <span class="li"><span class="ld" style="background:rgba(216,90,48,0.8)"></span>Total expenses</span>
+          <span class="li"><span class="ll" style="background:#BA7517"></span>Net cashflow</span>
+        </div>
+        <div class="cw" style="height:220px"><canvas id="comboChart"></canvas></div>
+      </div>
+    </div>
+    <div class="row2 mb">
+      <div class="card">
+        <div class="card-title">YTD Spend Breakdown</div>
+        <div class="lgnd" id="spendDonutLegend"></div>
+        <div class="cw" style="height:240px"><canvas id="spendDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Spending Pace vs Expected (42% at 5 months)</div>
+        <div class="lgnd">
+          <span class="li"><span class="ld" style="background:#185FA5"></span>Under expected pace</span>
+          <span class="li"><span class="ld" style="background:#EF9F27"></span>Slightly ahead</span>
+          <span class="li"><span class="ld" style="background:#E24B4A"></span>Well ahead of pace</span>
+        </div>
+        <div class="cw" style="height:680px"><canvas id="varianceYTD"></canvas></div>
+        <div class="chart-note">Deviation of % budget used from the 42% expected at 5/12 months. Positive = spending faster than pace.</div>
+      </div>
+    </div>
+    <div class="card mb">
+      <div class="card-title">2026 Budget vs YTD Actual (by Category)</div>
+      <div class="lgnd">
+        <span class="li"><span class="ld" style="background:#D3D1C7"></span>Annual budget</span>
+        <span class="li"><span class="ld" style="background:#185FA5"></span>On track (&lt;60%)</span>
+        <span class="li"><span class="ld" style="background:#EF9F27"></span>60–75% used</span>
+        <span class="li"><span class="ld" style="background:#E24B4A"></span>&gt;75% used</span>
+      </div>
+      <div class="cw" style="height:1300px"><canvas id="barYTD"></canvas></div>
+    </div>
+  </div><!-- /exp-ytd -->
+
+  <!-- ── MTD sub-pane ── -->
+  <div id="exp-mtd" class="sub-pane">
+    <div class="alert"><span style="font-size:16px">&#9888;</span><span>Data captured <strong>29 May 2026</strong> — month not yet complete.</span></div>
+    <div class="kpis mb">
+      <div class="kpi g"> <div class="kpi-lbl">May Net Income</div>       <div class="kpi-val">&#163;15,121</div><div class="kpi-sub">To date this month</div></div>
+      <div class="kpi a"> <div class="kpi-lbl">May Spend</div>            <div class="kpi-val">&#163;6,980</div><div class="kpi-sub">Excl. mortgage, partial month</div></div>
+      <div class="kpi">   <div class="kpi-lbl">Monthly Budget Used</div>  <div class="kpi-val">87.3%</div>   <div class="kpi-sub">Of &#163;8,000 monthly budget</div></div>
+      <div class="kpi t"> <div class="kpi-lbl">Net Cashflow</div>         <div class="kpi-val">+&#163;5,099</div><div class="kpi-sub">After mortgage &amp; taxes</div></div>
+    </div>
+    <div class="card mb">
+      <div class="card-title">May 2026 — Actual vs Monthly Budget (by Category)</div>
+      <div class="lgnd">
+        <span class="li"><span class="ld" style="background:#D3D1C7"></span>Monthly budget</span>
+        <span class="li"><span class="ld" style="background:#185FA5"></span>Under budget</span>
+        <span class="li"><span class="ld" style="background:#EF9F27"></span>75–100% of budget</span>
+        <span class="li"><span class="ld" style="background:#E24B4A"></span>Over budget</span>
+      </div>
+      <div class="cw" style="height:1240px"><canvas id="barMTD"></canvas></div>
+    </div>
+    <div class="card mb">
+      <div class="card-title">May 2026 — Over / Under Monthly Budget</div>
+      <div class="lgnd">
+        <span class="li"><span class="ld" style="background:#185FA5"></span>Under budget</span>
+        <span class="li"><span class="ld" style="background:#E24B4A"></span>Over budget</span>
+      </div>
+      <div class="cw" style="height:700px"><canvas id="varianceMTD"></canvas></div>
+      <div class="chart-note">Actual minus monthly budget per category. Red = over budget, blue = under. Month is partial.</div>
+    </div>
+  </div><!-- /exp-mtd -->
+
+</div><!-- /expenses -->
+
+
+<!-- ══════════════════════════════════════════
+     EXPENSE HISTORY
+══════════════════════════════════════════ -->
+<div id="exphistory" class="pane">
+  <div class="kpis3 mb">
+    <div class="kpi g"><div class="kpi-lbl">Total Spend 2025</div>        <div class="kpi-val">&#163;77.1K</div><div class="kpi-sub">All tracked categories excl. inv. property</div></div>
+    <div class="kpi a"><div class="kpi-lbl">Core Spend CAGR (10yr)</div>  <div class="kpi-val">+3.9%/yr</div><div class="kpi-sub">Core Essentials + Lifestyle + Travel, 2015–2025</div></div>
+    <div class="kpi r"><div class="kpi-lbl">Peak Spend Year</div>          <div class="kpi-val">2024</div>    <div class="kpi-sub">~£172K incl. one-off upfront university tuition</div></div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Annual Spend by Category Bucket (2012–2025)</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#185FA5"></span>Core Essentials</span>
+      <span class="li"><span class="ld" style="background:#1D9E75"></span>Children</span>
+      <span class="li"><span class="ld" style="background:#EF9F27"></span>Lifestyle</span>
+      <span class="li"><span class="ld" style="background:#97C459"></span>Housing</span>
+      <span class="li"><span class="ld" style="background:#5DCAA5"></span>Travel</span>
+    </div>
+    <div class="cw" style="height:340px"><canvas id="expHistStacked"></canvas></div>
+    <div class="chart-note">Investment Property excluded (see Property tab). 2024 Children spike = ~£90k one-off upfront university tuition for Eesha. 2016 &amp; 2018 Housing spikes = major home renovations.</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Key Category Trends (2012–2025)</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#185FA5"></span>Children Education</span>
+      <span class="li"><span class="ld" style="background:#5DCAA5"></span>Travel / Vacation</span>
+      <span class="li"><span class="ld" style="background:#639922"></span>Groceries</span>
+      <span class="li"><span class="ld" style="background:#EF9F27"></span>Dining Out</span>
+      <span class="li"><span class="ld" style="background:#D85A30"></span>Council Tax</span>
+      <span class="li"><span class="ld" style="background:#7030A0"></span>Utilities</span>
+    </div>
+    <div class="cw" style="height:320px"><canvas id="expHistLines"></canvas></div>
+    <div class="chart-note">Children Education 2024 normalised to £38,500 (original £128k included ~£90k one-off upfront tuition). 2020 Travel near-zero = COVID lockdowns.</div>
+  </div>
+</div><!-- /exphistory -->
+
+
+<!-- ══════════════════════════════════════════
+     PROPERTY
+══════════════════════════════════════════ -->
+<div id="property" class="pane">
+  <div class="kpis3 mb">
+    <div class="kpi g"><div class="kpi-lbl">2025–26 Gross Income</div>  <div class="kpi-val">&#163;37,232</div><div class="kpi-sub">Stanmore + Little Chalfont (YTD)</div></div>
+    <div class="kpi r"><div class="kpi-lbl">2025–26 Expenses</div>      <div class="kpi-val">&#163;16,797</div><div class="kpi-sub">All deductible costs YTD</div></div>
+    <div class="kpi t"><div class="kpi-lbl">2025–26 Net Profit</div>    <div class="kpi-val">&#163;20,436</div><div class="kpi-sub">Before income tax (50% each owner)</div></div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Annual Rental Income vs Expenses (UK Tax Years 2016–2026)</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#3B6D11"></span>Gross rental income</span>
+      <span class="li"><span class="ld" style="background:#D85A30"></span>Total deductible expenses</span>
+      <span class="li"><span class="ll" style="background:#185FA5"></span>Net profit (before tax)</span>
+    </div>
+    <div class="cw" style="height:300px"><canvas id="propCombo"></canvas></div>
+    <div class="chart-note">2022–23 income increase reflects addition of Little Chalfont flat. 2025–26 is YTD as of May 2026. Both properties owned 50/50 by Sandeep &amp; Seema.</div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Net Rental Yield (Net Profit ÷ Gross Income)</div>
+    <div class="lgnd">
+      <span class="li"><span class="ld" style="background:#3B6D11"></span>≥ 55% net yield</span>
+      <span class="li"><span class="ld" style="background:#1D9E75"></span>40–55% net yield</span>
+      <span class="li"><span class="ld" style="background:#EF9F27"></span>&lt; 40% net yield</span>
+    </div>
+    <div class="cw" style="height:240px"><canvas id="propYield"></canvas></div>
+    <div class="chart-note">Net yield = net profit / gross rental income. High-expense years (2017–18, 2021–22) reflect void periods and refurbishments.</div>
+  </div>
+</div><!-- /property -->
+
+</div><!-- /.main -->
+
+<div class="footer">Data as of 29 May 2026 &nbsp;&middot;&nbsp; Sources: Master Summary, Budget 2026, Expense History, Property, Securities Snapshot, Service Contracts</div>
+
+<script>
+var GBP='£';
+function fmtK(v){var abs=Math.abs(v);var s=abs>=1000?(abs/1000).toFixed(0)+'k':abs.toFixed(0);return v<0?'-'+GBP+s:GBP+s;}
+
+/* ─── Tab navigation ─── */
+function go(id){
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  document.querySelector('[data-tab="'+id+'"]').classList.add('on');
+  var sb=document.getElementById('sub-bar-'+id);
+  document.querySelectorAll('.sub-tab-bar').forEach(function(b){b.style.display='none';});
+  if(sb){sb.style.display='flex';}
+  setTimeout(function(){if(typeof Chart!=='undefined'){Object.values(Chart.instances).forEach(function(c){c.resize();})}},60);
+}
+function subgo(pid,sid){
+  document.getElementById(pid).querySelectorAll('.sub-pane').forEach(function(p){p.classList.remove('on');});
+  document.getElementById('sub-bar-'+pid).querySelectorAll('.sub-tab').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(sid).classList.add('on');
+  document.querySelector('[data-sub="'+sid+'"]').classList.add('on');
+  setTimeout(function(){if(typeof Chart!=='undefined'){Object.values(Chart.instances).forEach(function(c){c.resize();})}},60);
+}
+
+/* ─── ASSETS ─── */
+var ASSETS=[
+  {n:'Property / Real Estate',v:2450460,c:'#3B6D11'},
+  {n:'Pensions',v:1671229,c:'#1D9E75'},
+  {n:'ISAs / LISA Equity',v:1543404,c:'#185FA5'},
+  {n:'Cash & Fixed Income',v:512271,c:'#378ADD'},
+  {n:"Children's Investments",v:395742,c:'#97C459'},
+  {n:'Taxable Equity',v:119033,c:'#5DCAA5'},
+  {n:'Alternatives / VCT',v:75233,c:'#EF9F27'},
+  {n:'Crypto',v:22282,c:'#D85A30'},
+  {n:'Other Assets',v:19651,c:'#888780'}
+];
+var GROSS=6809304;
+var pieLeg=document.getElementById('pieLegend');
+ASSETS.forEach(function(a){var pct=(a.v/GROSS*100).toFixed(1);pieLeg.innerHTML+='<span class="li"><span class="ld" style="background:'+a.c+'"></span>'+a.n+' <strong style="color:#1A202C">'+pct+'%</strong></span>';});
+var tbody=document.getElementById('assetTbody');
+ASSETS.forEach(function(a){var pct=(a.v/GROSS*100);tbody.innerHTML+='<tr><td><span class="dot" style="background:'+a.c+'"></span>'+a.n+'<div class="bar-bg"><div class="bar-fill" style="width:'+Math.min(pct,100)+'%;background:'+a.c+'"></div></div></td><td style="text-align:right;font-weight:500;color:var(--navy)">'+GBP+(a.v/1000).toFixed(0)+'k</td><td style="text-align:right;color:var(--text2)">'+pct.toFixed(1)+'%</td></tr>';});
+
+/* ─── NET WORTH TREND (investable portfolio) ─── */
+var NW_L=["Dec '20","Jun '21","Jan '22","Feb '23","Jun '23","Dec '23","Jun '24","Dec '24","May '25","Aug '25","Oct '25","Dec '25","Feb '26","May '26"];
+var NW_ISA=  [523500,554000,582991,610329,721065,785371,1023327,1098824,1126220,1237534,1339327,1390846,1441835,1619836];
+var NW_PENS= [662500,705000,698007,768515,787519,920854,1069068,1186721,1208727,1315499,1395062,1433549,1502711,1671229];
+var NW_OTHER=[18571,128357,119992,112553,109713,97741,122652,118359,167833,177984,222182,215394,212735,216547];
+
+/* ─── YTD spend ─── */
+var YTD=[
+  {c:'Children Education',b:24000,a:13357.37},{c:'Travel / Vacation',b:20000,a:15170.25},
+  {c:'Groceries',b:6100,a:2430.49},{c:'Home Improvement',b:4560,a:4467.36},
+  {c:'Utilities',b:3600,a:1440.00},{c:'Council Tax',b:3480,a:1153.10},
+  {c:'Investment Property',b:3000,a:2418.21},{c:'Automobile',b:3000,a:1568.22},
+  {c:'Dining Out',b:3000,a:1069.88},{c:'Children Sports',b:2700,a:1005.26},
+  {c:'Transport',b:2400,a:854.79},{c:'Household',b:1800,a:452.98},
+  {c:'Gardening',b:1800,a:554.50},{c:'Clothing',b:1500,a:162.91},
+  {c:'Personal Care',b:1500,a:367.46},{c:'Sports / Gym',b:1200,a:467.70},
+  {c:'Healthcare',b:1200,a:755.34},{c:'Home Entertainment',b:1200,a:904.68},
+  {c:'Insurance',b:1200,a:236.20},{c:'Children Music',b:1080,a:502.45},
+  {c:'Children Clothing',b:1080,a:115.24},{c:'Fees',b:1080,a:316.30},
+  {c:'Computing',b:900,a:-392.52},{c:'Gifts',b:900,a:481.86},
+  {c:'Children Pocket Money',b:840,a:142.00},{c:'Entertainment',b:780,a:183.65},
+  {c:'Phone / Internet',b:600,a:192.51},{c:'Services / Memberships',b:480,a:77.98},
+  {c:'Hobbies / Leisure',b:420,a:7.53},{c:'Children Toys',b:180,a:5.68},
+  {c:'Charitable Donations',b:180,a:40.00},{c:'Education',b:180,a:0.00},
+  {c:'Home Office',b:60,a:230.92}
+].sort(function(x,y){return y.b-x.b;});
+
+/* ─── MTD spend ─── */
+var MTD=[
+  {c:'Children Education',b:2000,a:674.03},{c:'Travel / Vacation',b:1667,a:-326.57},
+  {c:'Groceries',b:508,a:294.36},{c:'Utilities',b:300,a:288},
+  {c:'Home Improvement',b:380,a:2670},{c:'Council Tax',b:290,a:0},
+  {c:'Investment Property',b:250,a:1380},{c:'Automobile',b:250,a:514.57},
+  {c:'Dining Out',b:250,a:72.50},{c:'Children Sports',b:225,a:72},
+  {c:'Transport',b:200,a:227.59},{c:'Household',b:150,a:122.95},
+  {c:'Gardening',b:150,a:200},{c:'Clothing',b:125,a:-8.51},
+  {c:'Personal Care',b:125,a:29.40},{c:'Sports / Gym',b:100,a:78.75},
+  {c:'Healthcare',b:100,a:114.85},{c:'Home Entertainment',b:100,a:14.58},
+  {c:'Insurance',b:100,a:68.84},{c:'Children Music',b:90,a:15},
+  {c:'Children Clothing',b:90,a:4.99},{c:'Fees',b:90,a:187},
+  {c:'Computing',b:75,a:44.98},{c:'Gifts',b:75,a:25.67},
+  {c:'Children Pocket Money',b:70,a:50},{c:'Entertainment',b:65,a:73.45},
+  {c:'Phone / Internet',b:50,a:30.78},{c:'Services / Memberships',b:40,a:35.99},
+  {c:'Hobbies / Leisure',b:35,a:0},{c:'Children Toys',b:15,a:25},
+  {c:'Charitable Donations',b:15,a:0}
+].sort(function(x,y){return y.b-x.b;});
+
+/* ─── Expense History ─── */
+var EH_YRS=['2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+var EH_BUCKETS=[
+  {n:'Core Essentials',c:'#185FA5',d:[9571,15871,12375,15713,25295,13170,13962,12855,12030,12606,14318,17311,18888,21606]},
+  {n:'Children',       c:'#1D9E75',d:[8891,8891,9384,7539,14714,20255,16527,22243,27471,33399,40654,44573,135950,27109]},
+  {n:'Lifestyle',      c:'#EF9F27',d:[4094,4328,4945,4013,6425,6162,7148,6214,2843,3888,5064,5890,5548,8355]},
+  {n:'Housing',        c:'#97C459',d:[873,5577,3050,306,19446,9664,36188,3045,2475,2682,4027,5618,2667,4832]},
+  {n:'Travel',         c:'#5DCAA5',d:[6231,3330,3548,8883,3618,6058,6083,4535,236,6176,3946,8060,6100,11840]}
+];
+var EH_CATS=[
+  {n:'Children Education',c:'#185FA5',d:[8891,8891,9384,7539,14714,18531,14203,18951,22632,27202,34291,35961,38500,22264]},
+  {n:'Travel / Vacation', c:'#5DCAA5',d:[6231,3330,3548,8883,3618,6058,6083,4535,236,6176,3946,8060,6100,11840]},
+  {n:'Groceries',         c:'#639922',d:[2043,2679,2393,2567,2939,2874,3201,2795,4311,3991,3927,4747,4788,5476]},
+  {n:'Dining Out',        c:'#EF9F27',d:[1384,1877,1931,1308,2613,2252,2523,1915,778,1286,2339,2571,2792,3468]},
+  {n:'Council Tax',       c:'#D85A30',d:[2157,2183,2181,1808,2099,2311,2020,2410,2504,2633,2744,2889,2977,3305]},
+  {n:'Utilities',         c:'#7030A0',d:[2277,1926,1951,1547,2189,1907,2220,2279,1725,2249,2943,3444,2317,2933]}
+];
+
+/* ─── Property ─── */
+var PROP=[
+  {y:'2016-17',inc:18000,exp:10313,net:7687},
+  {y:'2017-18',inc:18000,exp:14110,net:3890},
+  {y:'2018-19',inc:18000,exp:5915, net:12085},
+  {y:'2019-20',inc:17784,exp:8000, net:9784},
+  {y:'2020-21',inc:18900,exp:8016, net:10884},
+  {y:'2021-22',inc:16800,exp:11246,net:5554},
+  {y:'2022-23',inc:25650,exp:15435,net:10215},
+  {y:'2023-24',inc:34899,exp:20108,net:14792},
+  {y:'2024-25',inc:38600,exp:17870,net:20730},
+  {y:'2025-26',inc:37232,exp:16797,net:20436}
+];
+
+/* ══════════════════════════════════════════
+   CHART INIT
+══════════════════════════════════════════ */
+function initCharts(){
+
+  /* Asset donut */
+  new Chart(document.getElementById('pieChart'),{
+    type:'doughnut',
+    data:{labels:ASSETS.map(function(a){return a.n;}),datasets:[{data:ASSETS.map(function(a){return a.v;}),backgroundColor:ASSETS.map(function(a){return a.c;}),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  '+GBP+c.parsed.toLocaleString()+' ('+(c.parsed/GROSS*100).toFixed(1)+'%)';}}}}
+    }
+  });
+
+  /* Investable portfolio stacked bar */
+  new Chart(document.getElementById('nwTrend'),{
+    type:'bar',
+    data:{
+      labels:NW_L,
+      datasets:[
+        {label:'Non-ISA / Taxable & Alts',data:NW_OTHER,backgroundColor:'#EF9F27',borderRadius:2,stack:'s'},
+        {label:'Pensions',               data:NW_PENS, backgroundColor:'#1D9E75',borderRadius:2,stack:'s'},
+        {label:'ISA / LISA Equity',      data:NW_ISA,  backgroundColor:'#185FA5',borderRadius:2,stack:'s'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{
+        label:function(c){return '  '+c.dataset.label+': '+GBP+(c.parsed.y/1000).toFixed(0)+'k';},
+        footer:function(items){var t=items.reduce(function(s,i){return s+(i.raw||0);},0);return 'Total: '+GBP+(t/1000).toFixed(0)+'k';}
+      }}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}
+      }
+    }
+  });
+
+  /* Monthly cashflow combo */
+  new Chart(document.getElementById('comboChart'),{
+    type:'bar',
+    data:{
+      labels:['January','February','March','April','May'],
+      datasets:[
+        {label:'Net income',   type:'bar', data:[16015.26,26253.99,22089.56,15547.94,15120.55], backgroundColor:'rgba(99,153,34,0.8)', borderRadius:4,order:2},
+        {label:'Total expenses',type:'bar',data:[11818.00,11736.80,9225.82,10979.73,6980.20],  backgroundColor:'rgba(216,90,48,0.8)', borderRadius:4,order:2},
+        {label:'Net cashflow', type:'line',data:[1177.49,11545.19,9796.36,1564.31,5098.62],    borderColor:'#BA7517',backgroundColor:'transparent',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#BA7517',tension:0.3,order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+c.parsed.y.toLocaleString();}}}},
+      scales:{y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return fmtK(v);},font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}
+    }
+  });
+
+  /* YTD spend donut */
+  var SC=['#3B6D11','#1D9E75','#185FA5','#378ADD','#97C459','#5DCAA5','#EF9F27','#D85A30','#7030A0','#888780','#BA7517','#E24B4A'];
+  var YP=YTD.filter(function(r){return r.a>0;}).sort(function(a,b){return b.a-a.a;});
+  var YT=YP.reduce(function(s,r){return s+r.a;},0);
+  var SL=YP.slice(0,10).map(function(r){return r.c;}); var SD=YP.slice(0,10).map(function(r){return r.a;}); var SK=SC.slice(0,10);
+  if(YP.length>10){SL.push('Other');SD.push(YP.slice(10).reduce(function(s,r){return s+r.a;},0));SK.push('#C0BDBA');}
+  var sl=document.getElementById('spendDonutLegend');
+  SL.forEach(function(l,i){sl.innerHTML+='<span class="li"><span class="ld" style="background:'+SK[i]+'"></span>'+l+' <strong style="color:#1A202C">'+(SD[i]/YT*100).toFixed(1)+'%</strong></span>';});
+  new Chart(document.getElementById('spendDonut'),{type:'doughnut',data:{labels:SL,datasets:[{data:SD,backgroundColor:SK,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  '+GBP+c.parsed.toLocaleString()+' ('+(c.parsed/YT*100).toFixed(1)+'%)';}}}}}});
+
+  /* YTD pace variance */
+  var EX=41.67;
+  var YV=YTD.filter(function(r){return r.b>0;}).map(function(r){var p=r.a/r.b*100;return{c:r.c,p:p,v:parseFloat((p-EX).toFixed(1))};}).sort(function(a,b){return b.v-a.v;});
+  new Chart(document.getElementById('varianceYTD'),{type:'bar',data:{labels:YV.map(function(r){return r.c;}),datasets:[{data:YV.map(function(r){return r.v;}),backgroundColor:YV.map(function(r){return r.v>20?'#E24B4A':r.v>0?'#EF9F27':'#185FA5';}),borderRadius:3,barPercentage:0.65,categoryPercentage:0.85}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){var r=YV[c.dataIndex];var dir=r.v>=0?'ahead of':'behind';return '  '+r.p.toFixed(0)+'% used  ('+Math.abs(r.v).toFixed(0)+'% '+dir+' expected 42%)';}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return(v>0?'+':'')+v.toFixed(0)+'%';},font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:11},autoSkip:false}}}}});
+
+  /* YTD budget vs actual bars */
+  new Chart(document.getElementById('barYTD'),{type:'bar',data:{labels:YTD.map(function(r){return r.c;}),datasets:[{label:'Annual budget',data:YTD.map(function(r){return r.b;}),backgroundColor:'#D3D1C7',borderRadius:3,barPercentage:0.72,categoryPercentage:0.82},{label:'YTD actual',data:YTD.map(function(r){return r.a;}),backgroundColor:YTD.map(function(r){var p=r.a/r.b;return p>0.75?'#E24B4A':p>0.60?'#EF9F27':'#185FA5';}),borderRadius:3,barPercentage:0.72,categoryPercentage:0.82}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){var r=YTD[c.dataIndex];if(c.datasetIndex===1)return '  YTD actual: '+GBP+r.a.toLocaleString()+' ('+(r.a/r.b*100).toFixed(0)+'%)';return '  Annual budget: '+GBP+r.b.toLocaleString();}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return fmtK(v);},font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:11},autoSkip:false}}}}});
+
+  /* MTD budget vs actual */
+  new Chart(document.getElementById('barMTD'),{type:'bar',data:{labels:MTD.map(function(r){return r.c;}),datasets:[{label:'Monthly budget',data:MTD.map(function(r){return r.b;}),backgroundColor:'#D3D1C7',borderRadius:3,barPercentage:0.72,categoryPercentage:0.82},{label:'May actual',data:MTD.map(function(r){return r.a;}),backgroundColor:MTD.map(function(r){var p=r.a/r.b;return p>1?'#E24B4A':p>0.75?'#EF9F27':'#185FA5';}),borderRadius:3,barPercentage:0.72,categoryPercentage:0.82}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){var r=MTD[c.dataIndex];if(c.datasetIndex===1){var p=r.b>0?(r.a/r.b*100).toFixed(0):'--';return '  May actual: '+fmtK(r.a)+' ('+p+'%)';}return '  Monthly budget: '+GBP+r.b.toLocaleString();}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return fmtK(v);},font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:11},autoSkip:false}}}}});
+
+  /* MTD over/under variance */
+  var MV=MTD.map(function(r){return{c:r.c,v:parseFloat((r.a-r.b).toFixed(2)),p:r.b>0?r.a/r.b*100:0};}).sort(function(a,b){return b.v-a.v;});
+  new Chart(document.getElementById('varianceMTD'),{type:'bar',data:{labels:MV.map(function(r){return r.c;}),datasets:[{data:MV.map(function(r){return r.v;}),backgroundColor:MV.map(function(r){return r.v>0?'#E24B4A':'#185FA5';}),borderRadius:3,barPercentage:0.65,categoryPercentage:0.85}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){var r=MV[c.dataIndex];return '  '+(r.v>=0?'+':'')+GBP+Math.abs(r.v).toFixed(0)+'  ('+r.p.toFixed(0)+'% of budget)';}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){var a=Math.abs(v),f=a>=1000?(a/1000).toFixed(0)+'k':a.toFixed(0);return v<0?'-'+GBP+f:v>0?'+'+GBP+f:GBP+'0';},font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:11},autoSkip:false}}}}});
+
+  /* Expense History stacked bar */
+  new Chart(document.getElementById('expHistStacked'),{
+    type:'bar',
+    data:{labels:EH_YRS,datasets:EH_BUCKETS.map(function(b){return{label:b.n,data:b.d,backgroundColor:b.c,borderRadius:2,stack:'e'};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+Math.round(c.parsed.y).toLocaleString();},footer:function(items){var t=items.reduce(function(s,i){return s+(i.raw||0);},0);return 'Total: '+GBP+Math.round(t).toLocaleString();}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}}}
+  });
+
+  /* Expense History category lines */
+  new Chart(document.getElementById('expHistLines'),{
+    type:'line',
+    data:{labels:EH_YRS,datasets:EH_CATS.map(function(cat){return{label:cat.n,data:cat.d,borderColor:cat.c,backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:0.3};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+Math.round(c.parsed.y).toLocaleString();}}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return GBP+(v/1000).toFixed(0)+'k';},font:{size:11}}}}}
+  });
+
+  /* Property income vs expenses combo */
+  new Chart(document.getElementById('propCombo'),{
+    type:'bar',
+    data:{
+      labels:PROP.map(function(p){return p.y;}),
+      datasets:[
+        {label:'Gross rental income', type:'bar', data:PROP.map(function(p){return p.inc;}),backgroundColor:'#3B6D11',borderRadius:4,order:2},
+        {label:'Total expenses',      type:'bar', data:PROP.map(function(p){return p.exp;}),backgroundColor:'rgba(216,90,48,0.8)',borderRadius:4,order:2},
+        {label:'Net profit',          type:'line',data:PROP.map(function(p){return p.net;}),borderColor:'#185FA5',backgroundColor:'transparent',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#185FA5',tension:0.3,order:1}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return '  '+c.dataset.label+': '+GBP+c.parsed.y.toLocaleString();}}}},scales:{y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return fmtK(v);},font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  /* Property net yield bars */
+  var yields=PROP.map(function(p){return parseFloat((p.net/p.inc*100).toFixed(1));});
+  new Chart(document.getElementById('propYield'),{
+    type:'bar',
+    data:{labels:PROP.map(function(p){return p.y;}),datasets:[{label:'Net yield %',data:yields,backgroundColor:yields.map(function(y){return y>=55?'#3B6D11':y>=40?'#1D9E75':'#EF9F27';}),borderRadius:4,barPercentage:0.6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '  Net yield: '+c.parsed.y.toFixed(1)+'%';}}}},scales:{y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:function(v){return v.toFixed(0)+'%';},font:{size:11}},max:80},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+}
+
+if(typeof Chart!=='undefined'){initCharts();}
+else{window.addEventListener('load',function(){if(typeof Chart!=='undefined'){initCharts();}});}
+</script>
+</body>
+</html>
