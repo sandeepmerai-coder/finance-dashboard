@@ -202,7 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="income-row"><span class="income-label">Sandeep salary (net)</span><span class="income-val">&#163;45,955</span></div>
         <div class="income-row"><span class="income-label">Seema salary (net)</span><span class="income-val">&#163;36,001</span></div>
         <div class="income-row"><span class="income-label">Property income</span><span class="income-val">&#163;24,327</span></div>
-        <div class="income-row"><span class="income-label">Alternative income</span><span class="income-val">&#163;14,002</span></div>
+        <div class="income-row"><span class="income-label">Alternative income</span><span class="income-val">&#163;14,693</span></div>
         <div class="income-row"><span class="income-label">Passive income</span><span class="income-val">&#163;3,858</span></div>
         <div class="income-row"><span class="income-label">Est. additional taxes</span><span class="income-val">-&#163;12,683</span></div>
         <div class="income-row"><span class="income-label">Total net income</span><span class="income-val">&#163;112,151</span></div>
@@ -431,20 +431,20 @@ var ASSETS=[
   {n:'Property / Real Estate',v:2450460,c:'#3B6D11'},
   {n:'Pensions',v:1679397,c:'#1D9E75'},
   {n:'ISAs / LISA Equity',v:1556155,c:'#185FA5'},
-  {n:'Cash & Fixed Income',v:503343,c:'#378ADD'},
+  {n:'Cash & Fixed Income',v:502343,c:'#378ADD'},
   {n:"Children's Investments",v:398769,c:'#97C459'},
   {n:'Taxable Equity',v:123428,c:'#5DCAA5'},
   {n:'Alternatives / VCT',v:75233,c:'#EF9F27'},
   {n:'Crypto',v:19962,c:'#D85A30'},
   {n:'Other Assets',v:19651,c:'#888780'}
 ];
-var GROSS=6826398;
+var GROSS=6825398;
 
 /* ─── HIGH-LEVEL ASSET GROUPS ─── */
 var GROUPS=[
   {n:'Equity',            v:1679397+1556155+398769+123428, c:'#185FA5'},
   {n:'Property',          v:2450460,                       c:'#3B6D11'},
-  {n:'Cash & Fixed Income',v:503343,                       c:'#378ADD'},
+  {n:'Cash & Fixed Income',v:502343,                       c:'#378ADD'},
   {n:'Alternatives',      v:75233+19962+19651,              c:'#EF9F27'}
 ];
 var groupLeg=document.getElementById('groupLegend');
@@ -477,7 +477,7 @@ var YTD=[
   {c:'Computing',b:900,a:-343.53},{c:'Gifts',b:900,a:508.36},
   {c:'Children Pocket Money',b:840,a:187.00},{c:'Entertainment',b:780,a:275.35},
   {c:'Phone / Internet',b:600,a:259.07},{c:'Services / Memberships',b:480,a:181.98},
-  {c:'Hobbies / Leisure',b:420,a:106.96},{c:'Children Toys',b:180,a:5.68},
+  {c:'Hobbies / Leisure',b:420,a:126.96},{c:'Children Toys',b:180,a:5.68},
   {c:'Charitable Donations',b:180,a:40.00},{c:'Education',b:180,a:402.97},
   {c:'Home Office',b:60,a:230.92}
 ].sort(function(x,y){return y.b-x.b;});
@@ -546,7 +546,7 @@ var EH_LIFESTYLE=[
   {n:'Gifts',           id:'ls-gifts',         c:'#EF9F27', d:[820.04,687.54,359.72,646.52,1114.02,948.63,782.84,916.51,758.97,1127.15,1144.67,538.43,818.18,914.24,508.36]},
   {n:'Sports/Gym',      id:'ls-sports-gym',    c:'#D85A30', d:[318.76,327.90,875.38,819.07,681.79,650.97,678.09,839.21,534,195.60,97.20,577.26,269.23,1281.54,653.68]},
   {n:'Entertainment',   id:'ls-entertainment', c:'#7030A0', d:[636.94,580.07,577.39,392.21,832.48,543.28,957.01,746.78,111.13,565.89,615.16,956.63,764.51,818.67,275.35]},
-  {n:'Hobbies/Leisure', id:'ls-hobbies',       c:'#97C459', d:[171.61,95.06,130.45,0,165.19,804.12,901.44,837.13,427.63,406.28,283.22,429.91,227.57,418.86,106.96]}
+  {n:'Hobbies/Leisure', id:'ls-hobbies',       c:'#97C459', d:[171.61,95.06,130.45,0,165.19,804.12,901.44,837.13,427.63,406.28,283.22,429.91,227.57,418.86,126.96]}
 ];
 var EH_HOUSING=[
   {n:'Home Improvement', id:'ho-home-imp',   c:'#185FA5', d:[280.77,4128.87,2639.25,33.13,18762.42,7836.35,34627.87,1345.66,1014.51,1004.04,1931.49,3493.88,676.58,1474.85,9887.51]},
@@ -585,7 +585,7 @@ var PROP=[
 function initCharts(){
 
   /* Assets vs Debts bridge */
-  var DEBT=739074, NW_VAL=6087324;
+  var DEBT=739266, NW_VAL=6086132;
   new Chart(document.getElementById('debtBridge'),{
     type:'bar',
     data:{
