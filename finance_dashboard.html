@@ -90,7 +90,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="hdr-title">Personal Finance Dashboard</div>
     <div class="hdr-sub">Sandeep &amp; Seema &nbsp;&middot;&nbsp; All figures GBP</div>
   </div>
-  <div class="hdr-date">12 July 2026<br>Master Summary</div>
+  <div class="hdr-date">18 July 2026<br>Master Summary</div>
 </div>
 
 <!-- Top tabs -->
@@ -114,14 +114,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 ══════════════════════════════════════════ -->
 <div id="summary" class="pane on">
   <div class="kpis3 mb" style="margin-bottom:13px">
-    <div class="kpi">   <div class="kpi-lbl">Net Worth</div>         <div class="kpi-val">&#163;6.09M</div><div class="kpi-sub">As of 12 July 2026</div></div>
-    <div class="kpi g"> <div class="kpi-lbl">Gross Assets</div>      <div class="kpi-val">&#163;6.83M</div><div class="kpi-sub">Before debts</div></div>
-    <div class="kpi r"> <div class="kpi-lbl">Total Debts</div>       <div class="kpi-val">&#163;739K</div> <div class="kpi-sub">Mortgage &amp; loans</div></div>
+    <div class="kpi">   <div class="kpi-lbl">Net Worth</div>         <div class="kpi-val">&#163;6.03M</div><div class="kpi-sub">As of 18 July 2026</div></div>
+    <div class="kpi g"> <div class="kpi-lbl">Gross Assets</div>      <div class="kpi-val">&#163;6.77M</div><div class="kpi-sub">Before debts</div></div>
+    <div class="kpi r"> <div class="kpi-lbl">Total Debts</div>       <div class="kpi-val">&#163;740K</div> <div class="kpi-sub">Mortgage &amp; loans</div></div>
   </div>
   <div class="kpis3 mb">
-    <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div>        <div class="kpi-val">&#163;5.50M</div><div class="kpi-sub">Excl. residential home only</div></div>
-    <div class="kpi t"> <div class="kpi-lbl">Investable Liquid Assets</div> <div class="kpi-val">&#163;4.37M</div><div class="kpi-sub">Excl. all property</div></div>
-    <div class="kpi a"> <div class="kpi-lbl">Debt Ratio</div>               <div class="kpi-val">10.8%</div>     <div class="kpi-sub">Debt as % of gross assets</div></div>
+    <div class="kpi pu"><div class="kpi-lbl">Investable Assets</div>        <div class="kpi-val">&#163;5.44M</div><div class="kpi-sub">Excl. residential home only</div></div>
+    <div class="kpi t"> <div class="kpi-lbl">Investable Liquid Assets</div> <div class="kpi-val">&#163;4.32M</div><div class="kpi-sub">Excl. all property</div></div>
+    <div class="kpi a"> <div class="kpi-lbl">Debt Ratio</div>               <div class="kpi-val">10.9%</div>     <div class="kpi-sub">Debt as % of gross assets</div></div>
   </div>
 
   <div class="row2 mb">
@@ -152,7 +152,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span class="li"><span class="ld" style="background:#E24B4A"></span>Total Debts</span>
     </div>
     <div class="cw" style="height:110px"><canvas id="debtBridge"></canvas></div>
-    <div class="chart-note">Gross Assets = Net Worth + Total Debts. Debt ratio: 10.8% — low leverage.</div>
+    <div class="chart-note">Gross Assets = Net Worth + Total Debts. Debt ratio: 10.9% — low leverage.</div>
   </div>
 
   <div class="card mb">
@@ -401,7 +401,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 </div><!-- /.main -->
 
-<div class="footer">Data as of 12 July 2026 &nbsp;&middot;&nbsp; Sources: Master Summary, Budget 2026, Expense History, Property, Securities Snapshot, Service Contracts</div>
+<div class="footer">Data as of 18 July 2026 &nbsp;&middot;&nbsp; Sources: Master Summary, Budget 2026, Expense History, Property, Securities Snapshot, Service Contracts</div>
 
 <script>
 var GBP='£';
@@ -429,23 +429,23 @@ function subgo(pid,sid){
 /* ─── ASSETS ─── */
 var ASSETS=[
   {n:'Property / Real Estate',v:2450460,c:'#3B6D11'},
-  {n:'Pensions',v:1679397,c:'#1D9E75'},
-  {n:'ISAs / LISA Equity',v:1556155,c:'#185FA5'},
-  {n:'Cash & Fixed Income',v:502343,c:'#378ADD'},
-  {n:"Children's Investments",v:398769,c:'#97C459'},
-  {n:'Taxable Equity',v:123428,c:'#5DCAA5'},
+  {n:'Pensions',v:1668870,c:'#1D9E75'},
+  {n:'ISAs / LISA Equity',v:1518629,c:'#185FA5'},
+  {n:'Cash & Fixed Income',v:503410,c:'#378ADD'},
+  {n:"Children's Investments",v:393068,c:'#97C459'},
+  {n:'Taxable Equity',v:117549,c:'#5DCAA5'},
   {n:'Alternatives / VCT',v:75233,c:'#EF9F27'},
-  {n:'Crypto',v:19962,c:'#D85A30'},
+  {n:'Crypto',v:19951,c:'#D85A30'},
   {n:'Other Assets',v:19651,c:'#888780'}
 ];
-var GROSS=6825398;
+var GROSS=6766820;
 
 /* ─── HIGH-LEVEL ASSET GROUPS ─── */
 var GROUPS=[
-  {n:'Equity',            v:1679397+1556155+398769+123428, c:'#185FA5'},
+  {n:'Equity',            v:1668870+1518629+393068+117549, c:'#185FA5'},
   {n:'Property',          v:2450460,                       c:'#3B6D11'},
-  {n:'Cash & Fixed Income',v:502343,                       c:'#378ADD'},
-  {n:'Alternatives',      v:75233+19962+19651,              c:'#EF9F27'}
+  {n:'Cash & Fixed Income',v:503410,                       c:'#378ADD'},
+  {n:'Alternatives',      v:75233+19951+19651,              c:'#EF9F27'}
 ];
 var groupLeg=document.getElementById('groupLegend');
 GROUPS.forEach(function(g){var pct=(g.v/GROSS*100).toFixed(1);groupLeg.innerHTML+='<span class="li"><span class="ld" style="background:'+g.c+'"></span>'+g.n+' <strong style="color:#1A202C">'+pct+'%</strong></span>';});
@@ -457,9 +457,9 @@ ASSETS.forEach(function(a){var pct=(a.v/GROSS*100);tbody.innerHTML+='<tr><td><sp
 
 /* ─── NET WORTH TREND (investable portfolio) ─── */
 var NW_L=["Dec '20","Jun '21","Jan '22","Feb '23","Jun '23","Dec '23","Jun '24","Dec '24","May '25","Aug '25","Oct '25","Dec '25","Feb '26","Jun '26","Jul '26"];
-var NW_ISA=  [523500,554000,582991,610329,721065,785371,1023327,1098824,1126220,1237534,1339327,1390846,1441835,1609248,1632587];
-var NW_PENS= [662500,705000,698007,768515,787519,920854,1069068,1186721,1208727,1315499,1395062,1433549,1502711,1671836,1679397];
-var NW_OTHER=[18571,128357,119992,112553,109713,97741,122652,118359,167833,177984,222182,215394,212735,212795,218623];
+var NW_ISA=  [523500,554000,582991,610329,721065,785371,1023327,1098824,1126220,1237534,1339327,1390846,1441835,1609248,1595061];
+var NW_PENS= [662500,705000,698007,768515,787519,920854,1069068,1186721,1208727,1315499,1395062,1433549,1502711,1671836,1668870];
+var NW_OTHER=[18571,128357,119992,112553,109713,97741,122652,118359,167833,177984,222182,215394,212735,212795,212733];
 
 /* ─── YTD spend ─── */
 var YTD=[
@@ -585,7 +585,7 @@ var PROP=[
 function initCharts(){
 
   /* Assets vs Debts bridge */
-  var DEBT=739266, NW_VAL=6086132;
+  var DEBT=739532, NW_VAL=6027288;
   new Chart(document.getElementById('debtBridge'),{
     type:'bar',
     data:{
